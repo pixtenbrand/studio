@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixten Studio — Student Access</title>
+<style>
+  :root{--bg:#0c0d12;--panel:#13141c;--card:#171925;--card2:#1d2030;--line:#262a3b;
+        --txt:#e8eaf2;--dim:#8b90a6;--accent:#ff6b2c;--accent2:#ffb648;--ok:#3ddc84;--err:#ff6b6b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:"Segoe UI",system-ui,-apple-system,sans-serif;min-height:100vh}
+  a{color:inherit;text-decoration:none}
+
+  /* ---------- login ---------- */
+  #login{min-height:100vh;display:grid;place-items:center;padding:24px}
+  .box{width:min(380px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:30px 26px;text-align:center}
+  .logo{width:52px;height:52px;border-radius:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+        display:grid;place-items:center;font-weight:800;color:#1a1004;font-size:19px;margin:0 auto 16px}
+  .box h1{margin:0 0 4px;font-size:19px}
+  .box p{margin:0 0 20px;font-size:13px;color:var(--dim)}
+  .box input{width:100%;background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:10px;
+       padding:12px 14px;font-size:15px;outline:0;text-align:center;letter-spacing:.04em}
+  .box input:focus{border-color:var(--accent)}
+  .box button{width:100%;margin-top:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a1004;
+       border:0;padding:12px;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer}
+  .box button:disabled{opacity:.6;cursor:default}
+  .msg{min-height:18px;margin-top:12px;font-size:13px}
+  .msg.err{color:var(--err)}.msg.ok{color:var(--ok)}
+  .note{margin-top:18px;font-size:11.5px;color:#565b70;line-height:1.6}
+
+  /* ---------- hub ---------- */
+  #hub{display:none;padding:22px 26px 60px;max-width:1200px;margin:0 auto}
+  .top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand .logo{width:40px;height:40px;margin:0;font-size:15px}
+  .brand h2{margin:0;font-size:18px}.brand span{font-size:11px;color:var(--ok)}
+  .search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--card);
+          border:1px solid var(--line);border-radius:9px;padding:8px 13px;min-width:230px}
+  .search input{background:none;border:0;outline:0;color:var(--txt);font-size:13px;width:100%}
+  .out{background:var(--card);color:var(--dim);border:1px solid var(--line);border-radius:9px;padding:8px 13px;
+       font-size:12.5px;cursor:pointer;font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:17px;display:flex;
+        flex-direction:column;gap:11px;transition:.15s}
+  .card:hover{border-color:rgba(255,107,44,.45);transform:translateY(-2px)}
+  .chead{display:flex;align-items:flex-start;gap:11px}
+  .ico{width:38px;height:38px;flex:0 0 38px;border-radius:10px;display:grid;place-items:center;font-size:17px;
+       background:var(--card2);border:1px solid var(--line)}
+  .cat{font-size:9.5px;letter-spacing:.11em;font-weight:800;text-transform:uppercase}
+  .card h3{margin:2px 0 0;font-size:15.5px}
+  .desc{font-size:12.5px;color:var(--dim);line-height:1.55;margin:0;flex:1}
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-size:10.5px;font-family:ui-monospace,Consolas,monospace;background:var(--card2);border:1px solid var(--line);
+       color:var(--dim);padding:3px 7px;border-radius:5px}
+  .crow{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:11px}
+  .crow .st{font-size:11px;color:var(--dim);margin-right:auto}
+  .btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a1004;border:0;padding:9px 15px;
+       border-radius:9px;font-weight:700;font-size:13px;cursor:pointer}
+  .btn:disabled{opacity:.6;cursor:default}
+  .empty{color:var(--dim);font-size:13px;padding:40px 0;text-align:center;grid-column:1/-1}
+  .hint{margin-top:26px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);
+        border-radius:11px;padding:15px 18px;font-size:12.5px;color:var(--dim);line-height:1.6}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--card2);
+    border:1px solid var(--accent);color:var(--txt);padding:10px 18px;border-radius:9px;font-size:13px;
+    opacity:0;pointer-events:none;transition:.25s;z-index:99}
+  .toast.on{opacity:1}
+  @media(max-width:760px){#hub{padding:18px 16px 50px}.search{min-width:0;width:100%;margin-left:0}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="box">
+    <div class="logo">PX</div>
+    <h1>Pixten Studio</h1>
+    <p>Student tools — enter your access password</p>
+    <form id="lf" autocomplete="off">
+      <input id="pw" type="password" placeholder="Access password" autocomplete="off" autofocus>
+      <button id="go" type="submit">Unlock</button>
+    </form>
+    <div class="msg" id="msg"></div>
+    <div class="note">For students of Pixten only. Don't share your password.</div>
+  </div>
+</div>
+
+<div id="hub">
+  <div class="top">
+    <div class="brand"><div class="logo">PX</div>
+      <div><h2>Pixten Studio</h2><span>● unlocked</span></div></div>
+    <div class="search">🔍<input id="q" placeholder="Filter tools…" autocomplete="off"></div>
+    <button class="out" id="lock">Lock</button>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="hint">Click <b>Open</b> to launch a tool in a new tab. Tools run fully in your browser —
+    nothing you make is uploaded anywhere. First open of a large tool may take a few seconds while it loads.</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const toast = m => { const t=$('#toast'); t.textContent=m; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),1600); };
+let KEY = null, META = null, Q = '';
+const blobCache = {};
+
+async function loadMeta(){
+  if (META) return META;
+  const r = await fetch('meta.json', {cache:'no-store'});
+  META = await r.json();
+  return META;
+}
+async function deriveKey(pw, saltB64, iter){
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:b64(saltB64), iterations:iter, hash:'SHA-256' },
+    base, { name:'AES-GCM', length:256 }, false, ['decrypt']);
+}
+async function decrypt(key, bytes){
+  const iv = bytes.slice(0,12), tag = bytes.slice(12,28), ct = bytes.slice(28);
+  const data = new Uint8Array(ct.length + tag.length); data.set(ct); data.set(tag, ct.length);
+  return new Uint8Array(await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, data));
+}
+
+$('#lf').addEventListener('submit', async e => {
+  e.preventDefault();
+  const pw = $('#pw').value; if (!pw) return;
+  $('#go').disabled = true; $('#msg').className='msg'; $('#msg').textContent='Checking…';
+  try {
+    const meta = await loadMeta();
+    const key = await deriveKey(pw, meta.salt, meta.iter);
+    // verify against the token
+    const check = await decrypt(key, b64(meta.verifier));
+    if (new TextDecoder().decode(check) !== 'PIXTEN-OK') throw 0;
+    KEY = key;
+    $('#msg').className='msg ok'; $('#msg').textContent='Welcome!';
+    setTimeout(openHub, 250);
+  } catch (err) {
+    $('#msg').className='msg err'; $('#msg').textContent='Wrong password. Try again.';
+    $('#go').disabled = false; $('#pw').select();
+  }
+});
+
+function openHub(){
+  $('#login').style.display='none';
+  $('#hub').style.display='block';
+  render();
+}
+$('#lock').onclick = () => { KEY=null; for(const k in blobCache){ URL.revokeObjectURL(blobCache[k]); delete blobCache[k]; }
+  $('#hub').style.display='none'; $('#login').style.display='grid'; $('#pw').value=''; $('#pw').focus();
+  $('#msg').textContent=''; $('#go').disabled=false; };
+$('#q').oninput = e => { Q=e.target.value.toLowerCase().trim(); render(); };
+
+function render(){
+  const list = META.manifest.filter(t => (t.n+' '+t.d+' '+t.c).toLowerCase().includes(Q));
+  $('#grid').innerHTML = list.length ? list.map(t => `
+    <div class="card">
+      <div class="chead">
+        <div class="ico" style="color:${t.color}">${t.i}</div>
+        <div style="min-width:0">
+          <div class="cat" style="color:${t.color}">${t.c}</div>
+          <h3>${t.n}</h3>
+        </div>
+      </div>
+      <p class="desc">${t.d}</p>
+      <div class="tags"><span class="tag">${t.kb} KB</span><span class="tag">Browser tool</span></div>
+      <div class="crow">
+        <span class="st" id="st-${t.id}"></span>
+        <button class="btn" data-open="${t.id}">Open</button>
+      </div>
+    </div>`).join('') : `<div class="empty">Nothing matches “${Q}”.</div>`;
+}
+
+document.addEventListener('click', async e => {
+  const o = e.target.closest('[data-open]'); if (!o) return;
+  const id = o.dataset.open, st = $('#st-'+id);
+  if (blobCache[id]) { window.open(blobCache[id], '_blank'); return; }
+  o.disabled = true; st.textContent = 'Loading…';
+  try {
+    const r = await fetch(id + '.enc', {cache:'no-store'});
+    const bytes = new Uint8Array(await r.arrayBuffer());
+    const html = await decrypt(KEY, bytes);
+    const url = URL.createObjectURL(new Blob([html], {type:'text/html'}));
+    blobCache[id] = url;
+    window.open(url, '_blank');
+    st.textContent = 'Opened ✓';
+  } catch (err) {
+    st.textContent = 'Failed to open';
+    toast('Could not open — try again');
+  } finally { o.disabled = false; }
+});
+</script>
+</body>
+</html>
